@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const execa = require('execa');
 const ora = require('ora');
 const inquirer = require('inquirer');
