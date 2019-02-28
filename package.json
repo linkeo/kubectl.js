@@ -1,0 +1,41 @@
+{
+  "name": "kubectl.js",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "kubejs": "index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "kubectl",
+    "cli"
+  ],
+  "author": {
+    "name": "linkeo",
+    "email": "linkeo@qq.com",
+    "url": "https://github.com/linkeo"
+  },
+  "homepage": "https://github.com/linkeo/kubectl.js",
+  "repository": "github:linkeo/kubectl.js",
+  "bugs": {
+    "url": "https://github.com/linkeo/kubectl.js/issues"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "conf": "^2.2.0",
+    "execa": "^1.0.0",
+    "inquirer": "^6.2.2",
+    "inquirer-autocomplete-prompt": "^1.0.1",
+    "ora": "^3.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.14.1",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "prettier": "^1.16.4"
+  }
+}
