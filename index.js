@@ -1,55 +1,85 @@
 #!/usr/bin/env node
+const bluebird = require('bluebird');
 const execa = require('execa');
 const ora = require('ora');
 const inquirer = require('inquirer');
 const inquirerAutocompletePrompt = require('inquirer-autocomplete-prompt');
-const Conf = require('conf');
-const chalk = require('chalk');
+const chalk = require('chalk').default;
+
+const blankChars = ' \t\n\r\f\v';
+const regExpChars = '\\^$.*+?()[]{}|';
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt);
 
-const conf = new Conf();
-const find = (list, value) => {
-  const index = list.indexOf(value);
-  return index !== -1 ? index : undefined;
+const match = (text, input) => {
+  const inputChars = Array.from(input).filter(
+    input => blankChars.indexOf(input) === -1
+  );
+  const pattern = inputChars
+    .map(char => (regExpChars.indexOf(char) !== -1 ? `\\${char}` : char))
+    .join('.*');
+  return new RegExp(pattern).test(text);
 };
 
-const ask = (key, message, choices) =>
+const ask = (message, choices) =>
   inquirer
     .prompt([
       {
         type: 'autocomplete',
         message,
         source: async (answers, input) =>
-          choices.filter(choice => choice.startsWith(input || '')),
-        default: find(choices, conf.get(key)),
+          choices.filter(choice => match(choice, input || '')),
         name: 'input',
       },
     ])
-    .then(res => {
-      conf.set(key, res.input);
-      return res.input;
-    });
+    .then(res => res.input);
 
-const ops = [
-  'get',
-  // 'describe',
-  // 'create',
-  // 'update',
-  // 'delete',
-  // 'log',
-  // 'rolling-update',
-  'exec',
-  // 'port-forward',
-  // 'proxy',
-  // 'run',
-  // 'expose',
-  // 'label',
-  // 'config',
-  // 'cluster-info',
-  // 'api-versions',
-  // 'version',
-  // 'help',
+const askMultiple = (message, choices) =>
+  inquirer
+    .prompt([
+      {
+        type: 'autocomplete',
+        message,
+        suggestOnly: true,
+        source: async (answers, input) =>
+          choices.filter(choice => match(choice, input || '')),
+        name: 'input',
+      },
+    ])
+    .then(res => choices.filter(choice => match(choice, res.input || '')));
+
+const askFilter = (message, choices) =>
+  inquirer
+    .prompt([
+      {
+        type: 'checkbox',
+        message,
+        choices,
+        default: choices,
+        name: 'input',
+      },
+    ])
+    .then(res => res.input);
+
+/*
+ * Operations not implemented:
+ * 'describe', 'create', 'update', 'delete', 'rolling-update', 'port-forward', 'proxy',
+ * 'run', 'expose', 'label', 'config', 'cluster-info', 'api-versions', 'version', 'help'
+ */
+const ops = {
+  get: 'get',
+  exec: 'exec',
+  logHistory: 'log (history only)',
+  logFuture: 'log (future only)',
+  logMultipleFuture: 'log (future only, multiple pods)',
+};
+
+const oplist = [
+  ops.get,
+  ops.exec,
+  ops.logHistory,
+  ops.logFuture,
+  ops.logMultipleFuture,
 ];
 
 const resourceTypes = [
@@ -92,6 +122,32 @@ const resourceTypes = [
   'storageclasses',
 ];
 
+async function selectPod(namespace) {
+  const pods = await execa
+    .stdout('kubectl', ['-n', namespace, 'get', 'pods'])
+    .then(raw =>
+      raw
+        .trim()
+        .split('\n')
+        .map(line => line.trim().split(/\s+/)[0])
+        .filter(word => word !== 'NAME')
+    );
+  return ask('Select a pod:', pods);
+}
+
+async function selectMultiplePod(namespace) {
+  const pods = await execa
+    .stdout('kubectl', ['-n', namespace, 'get', 'pods'])
+    .then(raw =>
+      raw
+        .trim()
+        .split('\n')
+        .map(line => line.trim().split(/\s+/)[0])
+        .filter(word => word !== 'NAME')
+    );
+  return askMultiple('Select a pod:', pods);
+}
+
 async function main() {
   ora(
     chalk.yellow(
@@ -109,14 +165,13 @@ async function main() {
         .filter(word => word !== 'NAME')
     );
 
-  const namespace = await ask('namespace', 'Select a namespace:', namespaces);
-  const operation = await ask('operation', 'What do you want to do?', ops);
+  const namespace = await ask('Select a namespace:', namespaces);
+  const operation = await ask('What do you want to do?', oplist);
 
   switch (operation) {
-    case 'get':
+    case ops.get:
       {
         const resourceType = await ask(
-          'resourceType',
           'Select an resource type:',
           resourceTypes
         );
@@ -130,21 +185,51 @@ async function main() {
         console.log(output);
       }
       break;
-    case 'exec':
+    case ops.exec:
       {
-        const pods = await execa
-          .stdout('kubectl', ['-n', namespace, 'get', 'pods'])
-          .then(raw =>
-            raw
-              .trim()
-              .split('\n')
-              .map(line => line.trim().split(/\s+/)[0])
-              .filter(word => word !== 'NAME')
-          );
-        const pod = await ask('pod', 'Select a pod:', pods);
+        const pod = await selectPod(namespace);
         await execa('kubectl', ['-n', namespace, 'exec', '-it', pod, 'bash'], {
           stdio: 'inherit',
           reject: false,
+        });
+      }
+      break;
+    case ops.logHistory:
+      {
+        const pod = await selectPod(namespace);
+        await execa('kubectl', ['-n', namespace, 'log', pod], {
+          stdout: 'inherit',
+          stderr: 'inherit',
+          reject: false,
+        });
+      }
+      break;
+    case ops.logFuture:
+      {
+        const pod = await selectPod(namespace);
+        const e = execa('kubectl', ['-n', namespace, 'log', '-f', pod], {
+          reject: false,
+        });
+        e.stdout.pipe(process.stdout);
+        e.stderr.pipe(process.stderr);
+        await e;
+      }
+      break;
+    case ops.logMultipleFuture:
+      {
+        const pods = await selectMultiplePod(namespace).then(match =>
+          askFilter('Confirm pods you need:', match)
+        );
+
+        await bluebird.map(pods, pod => {
+          const e = execa(
+            'kubectl',
+            ['-n', namespace, 'log', '-f', '--since=0s', pod],
+            { reject: false }
+          );
+          e.stdout.pipe(process.stdout);
+          e.stderr.pipe(process.stderr);
+          return e;
         });
       }
       break;
