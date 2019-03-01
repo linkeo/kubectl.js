@@ -14,19 +14,6 @@ parserOptions:
   ecmaVersion: 2018
 rules:
   prettier/prettier: error
-  indent:
-    - error
-    - 2
-    - SwitchCase: 1
-  linebreak-style:
-    - error
-    - unix
-  quotes:
-    - error
-    - single
-  semi:
-    - error
-    - always
   prefer-template:
     - error
   no-console:
