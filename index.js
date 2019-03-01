@@ -8,6 +8,7 @@ const chalk = require('chalk').default;
 
 const blankChars = ' \t\n\r\f\v';
 const regExpChars = '\\^$.*+?()[]{}|';
+const args = process.argv.slice(2);
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt);
 
@@ -29,6 +30,18 @@ const ask = (message, choices) =>
         message,
         source: async (answers, input) =>
           choices.filter(choice => match(choice, input || '')),
+        when: answers => {
+          const input = args.shift();
+          if (!input) {
+            return true;
+          }
+          const found = choices.find(choice => match(choice, input));
+          if (!found) {
+            return true;
+          }
+          answers.input = found;
+          ora(`${chalk.bold(message)} ${chalk.cyan(found)}`).info();
+        },
         name: 'input',
       },
     ])
@@ -43,6 +56,18 @@ const askMultiple = (message, choices) =>
         suggestOnly: true,
         source: async (answers, input) =>
           choices.filter(choice => match(choice, input || '')),
+        when: answers => {
+          const input = args.shift();
+          if (!input) {
+            return true;
+          }
+          const found = choices.find(choice => match(choice, input));
+          if (!found) {
+            return true;
+          }
+          answers.input = input;
+          ora(`${chalk.bold(message)} ${chalk.cyan(input)}`).info();
+        },
         name: 'input',
       },
     ])
