@@ -232,9 +232,11 @@ async function main() {
     case ops.logFuture:
       {
         const pod = await selectPod(namespace);
-        const e = execa('kubectl', ['-n', namespace, 'log', '-f', pod], {
-          reject: false,
-        });
+        const e = execa(
+          'kubectl',
+          ['-n', namespace, 'log', '-f', '--tail=1', pod],
+          { reject: false }
+        );
         e.stdout.pipe(process.stdout);
         e.stderr.pipe(process.stderr);
         await e;
@@ -249,7 +251,7 @@ async function main() {
         await bluebird.map(pods, pod => {
           const e = execa(
             'kubectl',
-            ['-n', namespace, 'log', '-f', '--since=0s', pod],
+            ['-n', namespace, 'log', '-f', '--tail=1', pod],
             { reject: false }
           );
           e.stdout.pipe(process.stdout);
