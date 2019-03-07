@@ -258,11 +258,19 @@ async function main() {
           resourceTypes
         );
 
+        const namespace =
+          resourceType !== 'namespaces'
+            ? await ask('Select a namespace:', namespaces)
+            : null;
+
         const output =
           resourceType !== 'namespaces'
-            ? await ask('Select a namespace:', namespaces).then(namespace =>
-                execa.stdout('kubectl', ['-n', namespace, 'get', resourceType])
-              )
+            ? await execa.stdout('kubectl', [
+                '-n',
+                namespace,
+                'get',
+                resourceType,
+              ])
             : await execa.stdout('kubectl', ['get', resourceType]);
         console.log(output);
       }
@@ -273,6 +281,11 @@ async function main() {
           'Select an resource type:',
           resourceTypes
         );
+
+        const namespace =
+          resourceType !== 'namespaces'
+            ? await ask('Select a namespace:', namespaces)
+            : null;
 
         const spinner = spinners.default.dots;
         let index = 0;
@@ -286,15 +299,12 @@ async function main() {
             (async () => {
               const output =
                 resourceType !== 'namespaces'
-                  ? await ask('Select a namespace:', namespaces).then(
-                      namespace =>
-                        execa.stdout('kubectl', [
-                          '-n',
-                          namespace,
-                          'get',
-                          resourceType,
-                        ])
-                    )
+                  ? await execa.stdout('kubectl', [
+                      '-n',
+                      namespace,
+                      'get',
+                      resourceType,
+                    ])
                   : await execa.stdout('kubectl', ['get', resourceType]);
               const header = [
                 chalk.cyan(getFrame()),
