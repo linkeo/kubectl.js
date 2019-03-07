@@ -1,6 +1,6 @@
 {
   "name": "kubectl.js",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
   "main": "index.js",
   "bin": {
@@ -27,9 +27,11 @@
   "dependencies": {
     "bluebird": "^3.5.3",
     "chalk": "^2.4.2",
+    "cli-spinners": "^2.0.0",
     "execa": "^1.0.0",
     "inquirer": "^6.2.2",
     "inquirer-autocomplete-prompt": "^1.0.1",
+    "log-update": "^3.1.0",
     "ora": "^3.1.0"
   },
   "devDependencies": {

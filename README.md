@@ -1,83 +1,39 @@
 # kubectl.js
 
-A nice wrapper on kubectl. Provide some convenient command.
-
-## Features
-
-- Interactively use kubectl: You want to do `kubectl exec`, then choose a pod to do it.
-- Can fill prompts by command arguments. (Means you can prefill some question when you typing this command)
-
-## Installation
-
-```bash
-> npm i -g kubectl.js
-```
+kubectl.js is an wrapper for kubectl to get better UX.
 
 ## Usage
 
 ```bash
-> kubejs
+> kubectl [op [args...]]
 ```
 
-- At first, you will be asked to choose a namespace to run other command on.
-- Then you will be asked to choose an operation to execute.
+## Operations
 
-or
+- `(none)`  
+    Will ask you to choose one.
 
-```bash
-> kubejs mynamespace exec
-```
+- `get namespaces | [namespace][resource-type]`  
+    Print resources.
 
-- This time, first two prompts will be prefilled if the arguments is valid.
+- `get-watch namespaces | [namespace][resource-type]`  
+    Print resources every 1s.
 
-## Commands
+- `exec [namespace][pod]`  
+    Execute commands in a pod (bash)
 
-### Command: `get`
+- `log-history [namespace][pod]`  
+    Print history logs of a pod.
 
-You will be as to choose one type of resources.
+- `log-future [namespace][pod]`  
+    future logs of a pod.
 
-Will call this command internally:
+- `mlog-future [namespace][pod-keyword]`  
+    Print future logs of some pods.
 
-```bash
-> kubectl -n <namespace> get <resource type>
-```
+- `help`  
+    Print help.
 
-### Command: `exec`
+## Resource Types
 
-You will be as to choose a pod in the namespace you chosed at first.
-
-Will call this command internally to exec container:
-
-```bash
-> kubectl -n <namespace> exec -it <pod> bash
-```
-
-### Command : `log (history only)`
-
-You will be as to choose a pod in the namespace you chosed at first.
-
-Will call this command internally to print logs already writen in this pod:
-
-```bash
-> kubectl -n <namespace> log <pod>
-```
-
-### Command : `log (future only)`
-
-You will be as to choose a pod in the namespace you chosed at first.
-
-Will call this command internally to follow logs will be writen in this pod:
-
-```bash
-> kubectl -n <namespace> log -f <pod>
-```
-
-### Command : `log (future only, multiple pods)`
-
-You will be as to choose multiple pods. This will be two steps: first type keywords to filter out fewer pods, then choose exactly the pods you want (*The second step cannot be prefilled*).
-
-Will call this command internally on each pods to follow the logs:
-
-```bash
-> kubectl -n <namespace> log -f <pod>
-```
+all, deployments, endpoints, events, jobs, namespaces, nodes, pods, replicasets, services, statefulsets, storageclasses.
