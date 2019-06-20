@@ -2,10 +2,16 @@
 
 kubectl.js is an wrapper for kubectl to get better UX.
 
+## Installation
+
+```bash
+> npm i -g kubectl.js
+```
+
 ## Usage
 
 ```bash
-> kubectl [op [args...]]
+> kubejs [op [args...]]
 ```
 
 ## Operations
