@@ -7,6 +7,7 @@ const logUpdate = require('log-update');
 const spinners = require('cli-spinners');
 const inquirerAutocompletePrompt = require('inquirer-autocomplete-prompt');
 const chalk = require('chalk').default;
+const PodsWatcher = require('./plugins/pods_watcher');
 
 const blankChars = ' \t\n\r\f\v';
 const regExpChars = '\\^$.*+?()[]{}|';
@@ -293,6 +294,7 @@ async function main() {
           spinner.frames[(index = (index + 1) % spinner.frames.length)];
 
         logUpdate([chalk.cyan(getFrame()), chalk.gray('Pending...')].join(' '));
+        const watcher = new PodsWatcher(namespace);
         do {
           await Promise.all([
             sleep(1000),
@@ -306,6 +308,7 @@ async function main() {
                       resourceType,
                     ])
                   : await execa.stdout('kubectl', ['get', resourceType]);
+              watcher.update(output);
               const header = [
                 chalk.cyan(getFrame()),
                 chalk.gray('Watching...'),
