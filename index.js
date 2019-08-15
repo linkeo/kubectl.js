@@ -267,6 +267,8 @@ async function main() {
         const output =
           resourceType !== 'namespaces'
             ? await execa.stdout('kubectl', [
+                '-o',
+                'wide',
                 '-n',
                 namespace,
                 'get',
@@ -302,6 +304,8 @@ async function main() {
               const output =
                 resourceType !== 'namespaces'
                   ? await execa.stdout('kubectl', [
+                      '-o',
+                      'wide',
                       '-n',
                       namespace,
                       'get',
