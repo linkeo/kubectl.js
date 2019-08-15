@@ -1,11 +1,16 @@
 {
   "name": "kubectl.js",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "",
   "main": "index.js",
   "bin": {
     "kubejs": "index.js"
   },
+  "files": [
+    "index.js",
+    "README.md",
+    "plugins"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
