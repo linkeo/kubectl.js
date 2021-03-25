@@ -165,7 +165,9 @@ async function selectPod(namespace) {
       raw
         .trim()
         .split('\n')
-        .map(line => line.trim().split(/\s+/)[0])
+        .map(line => line.trim().split(/\s+/))
+        .filter(words => words[2] === 'Running')
+        .map(words => words[0])
         .filter(word => word !== 'NAME')
     );
   return ask('Select a pod:', pods);
@@ -178,7 +180,9 @@ async function selectMultiplePod(namespace) {
       raw
         .trim()
         .split('\n')
-        .map(line => line.trim().split(/\s+/)[0])
+        .map(line => line.trim().split(/\s+/))
+        .filter(words => words[2] === 'Running')
+        .map(words => words[0])
         .filter(word => word !== 'NAME')
     );
   return askMultiple('Select a pod:', pods);
