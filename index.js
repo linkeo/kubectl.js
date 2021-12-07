@@ -341,7 +341,7 @@ async function main() {
       {
         const namespace = await ask('Select a namespace:', namespaces);
         const pod = await selectPod(namespace);
-        await execa('kubectl', ['-n', namespace, 'log', pod], {
+        await execa('kubectl', ['-n', namespace, 'logs', pod], {
           stdout: 'inherit',
           stderr: 'inherit',
           reject: false,
@@ -354,7 +354,7 @@ async function main() {
         const pod = await selectPod(namespace);
         const e = execa(
           'kubectl',
-          ['-n', namespace, 'log', '-f', '--tail=1', pod],
+          ['-n', namespace, 'logs', '-f', '--tail=1', pod],
           { reject: false }
         );
         e.stdout.pipe(process.stdout);
@@ -372,7 +372,7 @@ async function main() {
         await bluebird.map(pods, pod => {
           const e = execa(
             'kubectl',
-            ['-n', namespace, 'log', '-f', '--tail=1', pod],
+            ['-n', namespace, 'logs', '-f', '--tail=1', pod],
             { reject: false }
           );
           e.stdout.pipe(process.stdout);
