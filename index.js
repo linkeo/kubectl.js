@@ -294,7 +294,7 @@ async function main() {
             ? await ask('Select a namespace:', namespaces)
             : null;
 
-        const spinner = spinners.default.dots;
+        const spinner = spinners.dots;
         let index = 0;
         const getFrame = () =>
           spinner.frames[(index = (index + 1) % spinner.frames.length)];
